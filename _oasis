@@ -1,0 +1,22 @@
+Name: vOxCaml
+Version: 0.1
+Synopsis: voxel engine
+Authors: David Holland <davidaholland001@gmail.com>
+License: BSD-3-clause
+
+Description: Intended to be an implementation of a voxel engine as seen at http://sites.google.com/site/letsmakeavoxelengine, but in OCaml
+Homepage: http://github.com/daholland/voxcaml
+
+OASISFormat: 0.4
+BuildTools: ocamlbuild
+Plugins: META (0.4), DevFiles (0.4)
+
+
+Executable "voxcaml"
+  Path: src
+  MainIs: voxcaml.ml
+  CompiledObject: best
+  BuildDepends:
+    result,
+    tsdl,
+    tgls.tgl3
