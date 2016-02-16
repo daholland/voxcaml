@@ -14,7 +14,7 @@ open Result
 
 let str = Printf.sprintf
 
-let ( >>== ) x f = match x with Ok v -> f v | Error _ as e -> e
+let ( >>= ) x f = match x with Ok v -> f v | Error _ as e -> e
 
 (* Helper functions. *)
 
@@ -128,8 +128,8 @@ let compile_shader src typ =
   (Gl.delete_shader sid; Error ( `Msg (log)))
 
 let create_program glsl_v =
-  compile_shader (vertex_shader glsl_v) Gl.vertex_shader >>== fun vid ->
-  compile_shader (fragment_shader glsl_v) Gl.fragment_shader >>== fun fid ->
+  compile_shader (vertex_shader glsl_v) Gl.vertex_shader >>= fun vid ->
+  compile_shader (fragment_shader glsl_v) Gl.fragment_shader >>= fun fid ->
   let pid = Gl.create_program () in
   let get_program pid e = get_int (Gl.get_programiv pid e) in
   Gl.attach_shader pid vid; Gl.delete_shader vid;
@@ -174,13 +174,13 @@ let create_window ~gl:(maj, min) =
   let w_atts = Sdl.Window.(opengl + resizable) in
   let w_title = Printf.sprintf "OpenGL %d.%d (core profile)" maj min in
   let set a v = Sdl.gl_set_attribute a v in
-  set Sdl.Gl.context_profile_mask Sdl.Gl.context_profile_core >>== fun () ->
-  set Sdl.Gl.context_major_version maj                        >>== fun () ->
-  set Sdl.Gl.context_minor_version min                        >>== fun () ->
-  set Sdl.Gl.doublebuffer 1                                   >>== fun () ->
-  Sdl.create_window ~w:640 ~h:480 w_title w_atts              >>== fun win ->
-  Sdl.gl_create_context win                                   >>== fun ctx ->
-  Sdl.gl_make_current win ctx                                 >>== fun () ->
+  set Sdl.Gl.context_profile_mask Sdl.Gl.context_profile_core >>= fun () ->
+  set Sdl.Gl.context_major_version maj                        >>= fun () ->
+  set Sdl.Gl.context_minor_version min                        >>= fun () ->
+  set Sdl.Gl.doublebuffer 1                                   >>= fun () ->
+  Sdl.create_window ~w:640 ~h:480 w_title w_atts              >>= fun win ->
+  Sdl.gl_create_context win                                   >>= fun ctx ->
+  Sdl.gl_make_current win ctx                                 >>= fun () ->
   Sdl.log "%a" pp_opengl_info ();
   Ok (win, ctx)
 
@@ -219,14 +219,14 @@ let event_loop win draw =
 (* Main *)
 
 let tri ~gl:(maj, min as gl) =
-  Sdl.init Sdl.Init.video          >>== fun () ->
-  create_window ~gl                >>== fun (win, ctx) ->
-  create_geometry ()               >>== fun (gid, bids) ->
-  create_program (glsl_version gl) >>== fun pid ->
-  event_loop win (draw pid gid)    >>== fun () ->
-  delete_program pid               >>== fun () ->
-  delete_geometry gid bids         >>== fun () ->
-  destroy_window win ctx           >>== fun () ->
+  Sdl.init Sdl.Init.video          >>= fun () ->
+  create_window ~gl                >>= fun (win, ctx) ->
+  create_geometry ()               >>= fun (gid, bids) ->
+  create_program (glsl_version gl) >>= fun pid ->
+  event_loop win (draw pid gid)    >>= fun () ->
+  delete_program pid               >>= fun () ->
+  delete_geometry gid bids         >>= fun () ->
+  destroy_window win ctx           >>= fun () ->
   Sdl.quit ();
   Ok ()
 
