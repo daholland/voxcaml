@@ -116,7 +116,7 @@ let draw pid gid win =
   Gl.clear Gl.color_buffer_bit;
   Gl.use_program pid;
   Gl.bind_vertex_array gid;
-  Gl.draw_elements Gl.triangles 3 Gl.unsigned_byte (`Offset 0);
+  Gl.draw_elements Gl.triangle_strip 4 Gl.unsigned_byte (`Offset 0);
   Gl.bind_vertex_array 0;
   Sdl.gl_swap_window win;
   Ok ()

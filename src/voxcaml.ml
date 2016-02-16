@@ -18,6 +18,9 @@ let ( >>= ) x f = match x with Ok v -> f v | Error _ as e -> e
 
 (* Helper functions. *)
 
+type voxvec3 = {x:float; y:float; z:float}
+
+let make_vec3 x y z = {x=x; y=y;z=z;}
 
 
 (* Shaders *)
@@ -38,6 +41,33 @@ let fragment_shader v = Printf.sprintf "
   out vec4 color;
   void main() { color = v_color; }" v
 
+let cube_vert =
+  let vs = bigarray_create Bigarray.float32 (4 * 3) in
+  let p1, p2, p3, p4, p5, p6, p7, p8 = (
+    make_vec3  (-0.2)  (-0.2)   0.2 ,
+    make_vec3    0.2   (-0.2)   0.2 ,
+    make_vec3    0.2     0.2    0.2 ,
+    make_vec3  (-0.2)    0.2    0.2 ,
+    make_vec3    0.2   (-0.2) (-0.2) ,
+    make_vec3  (-0.2) ( -0.2) (-0.2) ,
+    make_vec3  (-0.2)    0.2  (-0.2) ,
+    make_vec3    0.2     0.2  (-0.2) 
+  ) in
+  set_3d vs 1 p1.x p1.y p1.z;
+  set_3d vs 0 p2.x p2.y p2.z;
+  set_3d vs 2 p3.x p3.y p3.z;
+  set_3d vs 3 p4.x p4.y p4.z;
+  vs
+(* todo: make the square into a cube now; also remember that its set to draw triangle_strip atm *)
+let cube_clr =
+  let cs = bigarray_create Bigarray.float32 (4 * 3) in
+  set_3d cs 0 1.0 0.0 0.0;
+  set_3d cs 1 0.0 1.0 0.0;
+  set_3d cs 2 0.0 0.0 1.0;
+  set_3d cs 3 1.0 1.0 1.0;
+  cs
+
+
 let vertices =
   let vs = bigarray_create Bigarray.float32 (3 * 3) in
   set_3d vs 0 (-0.8) (-0.8) 0.0;
@@ -53,8 +83,9 @@ let colors =
   cs
 
 let indices =
-  let is = bigarray_create Bigarray.int8_unsigned 3 in
+  let is = bigarray_create Bigarray.int8_unsigned 4 in
   set_3d is 0 0 1 2;
+  is.{3} <- 3;
   is
 
 
@@ -112,7 +143,7 @@ let tri ~gl:(maj, min as gl) =
   let glsl_version = (glsl_version gl) in
   Sdl.init Sdl.Init.video                                  >>= fun () ->
   create_window ~gl                                        >>= fun (win, ctx) ->
-  Voxgl.create_geometry indices vertices colors ()               >>= fun (gid, bids) ->
+  Voxgl.create_geometry indices cube_vert cube_clr ()               >>= fun (gid, bids) ->
   Voxgl.create_program (vertex_shader glsl_version) (fragment_shader glsl_version)                         >>= fun pid ->
   event_loop win (draw pid gid)                            >>= fun () ->
   Voxgl.delete_program pid                                       >>= fun () ->
