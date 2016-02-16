@@ -11,12 +11,18 @@ OASISFormat: 0.4
 BuildTools: ocamlbuild
 Plugins: META (0.4), DevFiles (0.4)
 
+Library "voxgl"
+  Modules: Voxgl
+  Path: src/lib
+  CompiledObject: best
+  BuildDepends:
+    result,
+    tsdl,
+    tgls.tgl3
 
 Executable "voxcaml"
   Path: src
   MainIs: voxcaml.ml
   CompiledObject: best
   BuildDepends:
-    result,
-    tsdl,
-    tgls.tgl3
+    voxgl
